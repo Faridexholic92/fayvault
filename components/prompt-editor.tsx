@@ -1,7 +1,5 @@
 "use client"
 
-import CodeMirror, { EditorView } from "@uiw/react-codemirror"
-import { markdown } from "@codemirror/lang-markdown"
 import { parseVariables } from "@/lib/parse-variables"
 
 export function PromptEditor({
@@ -14,12 +12,12 @@ export function PromptEditor({
   const vars = parseVariables(value)
   return (
     <div className="space-y-2">
-      <CodeMirror
+      <textarea
         value={value}
-        height="220px"
-        extensions={[markdown(), EditorView.lineWrapping]}
-        onChange={onChange}
-        className="border rounded overflow-hidden text-sm"
+        onChange={(e) => onChange(e.target.value)}
+        rows={8}
+        placeholder="Tulis isi prompt kau di sini... guna {pemboleh_ubah} untuk medan dinamik"
+        className="w-full border rounded p-3 text-sm leading-relaxed font-mono whitespace-pre-wrap break-words resize-y bg-white"
       />
       <p className="text-sm text-gray-500">
         Variable dikesan:{" "}
