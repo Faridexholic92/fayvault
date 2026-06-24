@@ -1,16 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
 import { parseVariables } from "@/lib/parse-variables"
 import { PromptEditor } from "@/components/prompt-editor"
+import { savePrompt, deletePrompt } from "@/app/vault/actions"
 import type { Prompt } from "@/lib/types"
 
 export function PromptForm({ prompt }: { prompt?: Prompt }) {
-  const router = useRouter()
-  const supabase = createClient()
-
   const [title, setTitle] = useState(prompt?.title ?? "")
   const [description, setDescription] = useState(prompt?.description ?? "")
   const [body, setBody] = useState(prompt?.body ?? "")
@@ -24,47 +20,28 @@ export function PromptForm({ prompt }: { prompt?: Prompt }) {
     .map((t) => t.trim())
     .filter(Boolean)
 
-  async function save() {
+  async function onSave() {
     setSaving(true)
     setMsg("")
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    if (!user) {
-      setMsg("Sesi tamat. Sila log masuk semula.")
-      setSaving(false)
-      return
-    }
-
-    const payload = {
-      owner_id: user.id,
+    const result = await savePrompt({
+      id: prompt?.id,
       title,
       description,
       body,
       tags,
-      variables,
-      updated_at: new Date().toISOString(),
-    }
-
-    const res = prompt
-      ? await supabase.from("prompts").update(payload).eq("id", prompt.id)
-      : await supabase.from("prompts").insert(payload)
-
-    if (res.error) {
-      setMsg(res.error.message)
+    })
+    // Jika berjaya, server action akan redirect ke /vault.
+    // Kalau sampai sini bermakna ada ralat.
+    if (result?.error) {
+      setMsg(result.error)
       setSaving(false)
-      return
     }
-    router.push("/vault")
-    router.refresh()
   }
 
-  async function remove() {
+  async function onDelete() {
     if (!prompt) return
     if (!confirm("Padam prompt ni?")) return
-    await supabase.from("prompts").delete().eq("id", prompt.id)
-    router.push("/vault")
-    router.refresh()
+    await deletePrompt(prompt.id)
   }
 
   // ---- Test Live (bonus) ----
@@ -93,7 +70,7 @@ export function PromptForm({ prompt }: { prompt?: Prompt }) {
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="cth: Email follow-up client"
+            placeholder="cth: Poster Iklan Makanan"
             className="w-full border rounded px-3 py-2"
           />
         </div>
@@ -104,7 +81,7 @@ export function PromptForm({ prompt }: { prompt?: Prompt }) {
           <input
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Optional"
+            placeholder="Optional - cth: sumber ChatGPT"
             className="w-full border rounded px-3 py-2"
           />
         </div>
@@ -119,14 +96,14 @@ export function PromptForm({ prompt }: { prompt?: Prompt }) {
           <input
             value={tagsInput}
             onChange={(e) => setTagsInput(e.target.value)}
-            placeholder="email, marketing, coding"
+            placeholder="poster, makanan, marketing"
             className="w-full border rounded px-3 py-2"
           />
         </div>
 
         <div className="flex items-center gap-3">
           <button
-            onClick={save}
+            onClick={onSave}
             disabled={saving || !title || !body}
             className="bg-black text-white rounded px-4 py-2 disabled:opacity-50"
           >
@@ -134,7 +111,7 @@ export function PromptForm({ prompt }: { prompt?: Prompt }) {
           </button>
           {prompt && (
             <button
-              onClick={remove}
+              onClick={onDelete}
               className="text-red-600 text-sm hover:underline"
             >
               Padam
