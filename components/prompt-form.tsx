@@ -1,12 +1,15 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { parseVariables } from "@/lib/parse-variables"
 import { PromptEditor } from "@/components/prompt-editor"
 import { savePrompt, deletePrompt } from "@/app/vault/actions"
 import type { Prompt } from "@/lib/types"
 
 export function PromptForm({ prompt }: { prompt?: Prompt }) {
+  const router = useRouter()
+
   const [title, setTitle] = useState(prompt?.title ?? "")
   const [description, setDescription] = useState(prompt?.description ?? "")
   const [body, setBody] = useState(prompt?.body ?? "")
@@ -30,18 +33,25 @@ export function PromptForm({ prompt }: { prompt?: Prompt }) {
       body,
       tags,
     })
-    // Jika berjaya, server action akan redirect ke /vault.
-    // Kalau sampai sini bermakna ada ralat.
-    if (result?.error) {
+    if ("error" in result) {
       setMsg(result.error)
       setSaving(false)
+      return
     }
+    router.push("/vault")
+    router.refresh()
   }
 
   async function onDelete() {
     if (!prompt) return
     if (!confirm("Padam prompt ni?")) return
-    await deletePrompt(prompt.id)
+    const result = await deletePrompt(prompt.id)
+    if ("error" in result) {
+      setMsg(result.error)
+      return
+    }
+    router.push("/vault")
+    router.refresh()
   }
 
   // ---- Test Live (bonus) ----

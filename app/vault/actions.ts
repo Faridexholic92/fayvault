@@ -1,9 +1,10 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { parseVariables } from "@/lib/parse-variables"
+
+type ActionResult = { ok: true } | { error: string }
 
 export async function savePrompt(input: {
   id?: string
@@ -11,7 +12,7 @@ export async function savePrompt(input: {
   description: string
   body: string
   tags: string[]
-}) {
+}): Promise<ActionResult> {
   const supabase = await createClient()
 
   const { error } = await supabase.rpc("save_prompt", {
@@ -31,17 +32,19 @@ export async function savePrompt(input: {
   }
 
   revalidatePath("/vault")
-  redirect("/vault")
+  return { ok: true }
 }
 
-export async function deletePrompt(id: string) {
+export async function deletePrompt(id: string): Promise<ActionResult> {
   const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) redirect("/login")
+  if (!user) return { error: "Sesi tamat. Sila log masuk semula." }
 
-  await supabase.from("prompts").delete().eq("id", id)
+  const { error } = await supabase.from("prompts").delete().eq("id", id)
+  if (error) return { error: error.message }
+
   revalidatePath("/vault")
-  redirect("/vault")
+  return { ok: true }
 }
