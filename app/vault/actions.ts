@@ -13,27 +13,21 @@ export async function savePrompt(input: {
   tags: string[]
 }) {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) redirect("/login")
 
-  const payload = {
-    owner_id: user.id,
-    title: input.title,
-    description: input.description,
-    body: input.body,
-    tags: input.tags,
-    variables: parseVariables(input.body),
-    updated_at: new Date().toISOString(),
-  }
+  const { error } = await supabase.rpc("save_prompt", {
+    p_id: input.id ?? null,
+    p_title: input.title,
+    p_description: input.description,
+    p_body: input.body,
+    p_tags: input.tags,
+    p_variables: parseVariables(input.body),
+  })
 
-  const res = input.id
-    ? await supabase.from("prompts").update(payload).eq("id", input.id)
-    : await supabase.from("prompts").insert(payload)
-
-  if (res.error) {
-    return { error: res.error.message }
+  if (error) {
+    if (error.message.includes("TIDAK_LOG_MASUK")) {
+      return { error: "Sesi tamat. Sila log keluar & log masuk semula." }
+    }
+    return { error: error.message }
   }
 
   revalidatePath("/vault")
