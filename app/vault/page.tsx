@@ -4,7 +4,11 @@ import { PromptList } from "@/components/prompt-list"
 
 export const dynamic = "force-dynamic"
 
-export default async function VaultPage() {
+export default async function VaultPage({
+  searchParams,
+}: {
+  searchParams: { tag?: string }
+}) {
   const supabase = await createClient()
   const {
     data: { user },
@@ -25,5 +29,5 @@ export default async function VaultPage() {
     )
   }
 
-  return <PromptList prompts={data ?? []} />
+  return <PromptList prompts={data ?? []} initialTag={searchParams.tag ?? ""} />
 }
