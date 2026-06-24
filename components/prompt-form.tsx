@@ -20,6 +20,7 @@ export function PromptForm({ prompt }: { prompt?: Prompt }) {
     prompt?.image_url ?? null,
   )
   const [uploading, setUploading] = useState(false)
+  const [zoom, setZoom] = useState(false)
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState("")
 
@@ -109,6 +110,19 @@ export function PromptForm({ prompt }: { prompt?: Prompt }) {
 
   return (
     <div className="space-y-6">
+      {zoom && imageUrl && (
+        <div
+          onClick={() => setZoom(false)}
+          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 cursor-zoom-out"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={imageUrl}
+            alt="cover penuh"
+            className="max-h-full max-w-full object-contain rounded-lg"
+          />
+        </div>
+      )}
       <div className="space-y-4 bg-white border rounded-xl p-5">
         <div>
           <label className="block text-sm font-medium mb-1">Tajuk</label>
@@ -141,10 +155,11 @@ export function PromptForm({ prompt }: { prompt?: Prompt }) {
               <img
                 src={imageUrl}
                 alt="cover"
-                className="h-20 w-20 rounded-lg object-cover border"
+                onClick={() => setZoom(true)}
+                className="h-40 w-40 rounded-lg object-cover border cursor-zoom-in hover:opacity-90"
               />
             ) : (
-              <div className="h-20 w-20 rounded-lg border border-dashed flex items-center justify-center text-gray-400 text-xs text-center">
+              <div className="h-40 w-40 rounded-lg border border-dashed flex items-center justify-center text-gray-400 text-xs text-center">
                 Tiada gambar
               </div>
             )}
@@ -192,7 +207,7 @@ export function PromptForm({ prompt }: { prompt?: Prompt }) {
           <button
             onClick={onSave}
             disabled={saving || uploading || !title || !body}
-            className="bg-black text-white rounded px-4 py-2 disabled:opacity-50"
+            className="btn-primary rounded px-4 py-2 disabled:opacity-50"
           >
             {saving ? "Menyimpan..." : "Simpan"}
           </button>

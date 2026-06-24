@@ -48,7 +48,7 @@ export function CollectionManager({ collections }: { collections: Col[] }) {
         <button
           onClick={add}
           disabled={busy || !name.trim()}
-          className="bg-black text-white rounded px-4 py-2 disabled:opacity-50"
+          className="btn-primary rounded px-4 py-2 disabled:opacity-50"
         >
           {busy ? "..." : "Tambah"}
         </button>

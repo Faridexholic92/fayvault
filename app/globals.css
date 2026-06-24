@@ -1,3 +1,52 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ---- Pilihan warna tema (accent) ---- */
+:root {
+  --accent: #16a34a;
+  --accent-hover: #15803d;
+}
+[data-accent="green"]  { --accent: #16a34a; --accent-hover: #15803d; }
+[data-accent="blue"]   { --accent: #2563eb; --accent-hover: #1d4ed8; }
+[data-accent="purple"] { --accent: #7c3aed; --accent-hover: #6d28d9; }
+[data-accent="pink"]   { --accent: #db2777; --accent-hover: #be185d; }
+[data-accent="orange"] { --accent: #ea580c; --accent-hover: #c2410c; }
+[data-accent="black"]  { --accent: #111827; --accent-hover: #000000; }
+
+@layer components {
+  .btn-primary { background-color: var(--accent); color: #fff; }
+  .btn-primary:hover { background-color: var(--accent-hover); }
+}
+
+.text-accent { color: var(--accent); }
+.bg-accent { background-color: var(--accent); }
+
+body { transition: background-color 0.2s ease, color 0.2s ease; }
+
+/* ---- Dark mode (override utiliti biasa) ---- */
+.dark body { background-color: #0b1220; color: #e5e7eb; }
+.dark .bg-gray-50  { background-color: #0b1220 !important; }
+.dark .bg-white    { background-color: #111827 !important; color: #e5e7eb; }
+.dark .bg-gray-100 { background-color: #1f2937 !important; color: #e5e7eb; }
+.dark .bg-gray-800 { background-color: #374151 !important; }
+.dark .border,
+.dark .border-t,
+.dark .border-b { border-color: #1f2937 !important; }
+.dark .divide-y > * { border-color: #1f2937 !important; }
+.dark .text-gray-900 { color: #f3f4f6 !important; }
+.dark .text-gray-700 { color: #e5e7eb !important; }
+.dark .text-gray-600 { color: #cbd5e1 !important; }
+.dark .text-gray-500 { color: #9ca3af !important; }
+.dark .text-gray-400 { color: #94a3b8 !important; }
+.dark .hover\:bg-gray-50:hover { background-color: #1f2937 !important; }
+.dark .hover\:bg-gray-100:hover { background-color: #1f2937 !important; }
+.dark .hover\:text-black:hover { color: #ffffff !important; }
+.dark .hover\:border-gray-400:hover { border-color: #4b5563 !important; }
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: #0b1220 !important;
+  color: #e5e7eb !important;
+  border-color: #1f2937;
+}

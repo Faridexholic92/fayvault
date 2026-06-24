@@ -1,6 +1,6 @@
 "use client"
 
-import CodeMirror from "@uiw/react-codemirror"
+import CodeMirror, { EditorView } from "@uiw/react-codemirror"
 import { markdown } from "@codemirror/lang-markdown"
 import { parseVariables } from "@/lib/parse-variables"
 
@@ -17,9 +17,9 @@ export function PromptEditor({
       <CodeMirror
         value={value}
         height="220px"
-        extensions={[markdown()]}
+        extensions={[markdown(), EditorView.lineWrapping]}
         onChange={onChange}
-        className="border rounded overflow-hidden"
+        className="border rounded overflow-hidden text-sm"
       />
       <p className="text-sm text-gray-500">
         Variable dikesan:{" "}
