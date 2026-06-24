@@ -11,9 +11,15 @@ export async function createClient() {
         getAll: () => cookieStore.getAll(),
         setAll: (
           items: { name: string; value: string; options?: CookieOptions }[],
-        ) =>
-          items.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)),
+        ) => {
+          try {
+            items.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options))
+          } catch {
+            // Dipanggil dari Server Component - boleh diabaikan
+            // sebab middleware akan refresh sesi.
+          }
+        },
       },
     },
   )

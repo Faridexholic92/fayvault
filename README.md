@@ -1,46 +1,44 @@
-# Prompt Vault — Starter (Fasa 1)
+# Prompt Vault
 
-Tool untuk **simpan, susun, test & jual prompt**. Starter ni dah ada ciri pembeza utama: **Test Live** (isi variable → run AI → tengok output).
+Vault peribadi untuk **simpan & susun koleksi prompt kau**. Ada login (private), borang simpan, senarai + carian/tag, edit/padam. Bonus: **Test Live** (cuba prompt dengan AI).
 
-## Cara mula
+## Setup
 
 ```bash
-# 1. Pasang dependency
 npm install
-
-# 2. Salin env & isi kunci kau
-cp .env.local.example .env.local
-#   - NEXT_PUBLIC_SUPABASE_URL
-#   - NEXT_PUBLIC_SUPABASE_ANON_KEY
-#   - GEMINI_API_KEY  (dari https://aistudio.google.com)
-
-# 3. Cipta jadual DB: buka Supabase > SQL Editor,
-#    salin-tampal isi supabase/schema.sql, run.
-
-# 4. Jalankan
+cp .env.local.example .env.local   # isi 3 kunci
 npm run dev
-# buka http://localhost:3000
 ```
 
-## Apa yang dah siap
+Isi `.env.local`:
 
-- `app/page.tsx` — demo **Test Live** (editor + auto-detect variable + run AI)
-- `lib/parse-variables.ts` — cari & isi corak `{nama}`
-- `lib/supabase/` — client (browser) + server
-- `app/api/run/route.ts` — endpoint panggil Gemini (server-side, kunci selamat)
-- `components/prompt-editor.tsx` — editor CodeMirror + papar variable dikesan
-- `components/variable-form.tsx` — borang auto dari variable + butang Test Live
-- `supabase/schema.sql` — jadual + RLS + trigger
+- `NEXT_PUBLIC_SUPABASE_URL` - Supabase > Settings > API > Project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - anon public key
+- `GEMINI_API_KEY` - untuk Test Live (https://aistudio.google.com)
 
-## Langkah seterusnya (rujuk blueprint Notion)
+## Database
 
-1. Auth (Supabase Auth)
-2. CRUD prompt + simpan ke DB
-3. Version history
-4. Carian + tag
-5. Public link `/p/[id]`
+Buka Supabase > SQL Editor > tampal isi `supabase/schema.sql` > Run.
+(Kalau kau dah run sebelum ni, tak payah ulang.)
 
-## Nota keselamatan
+## Auth
 
-- `GEMINI_API_KEY` HANYA di server (`api/run`). Jangan dedah di client.
-- Sebelum production: tambah had kadar (cth 10 run/hari/user) + sahkan auth dalam `api/run`.
+Guna Supabase Auth (email + kata laluan).
+
+- Untuk dev senang: Supabase > Authentication > Providers > Email > **matikan "Confirm email"** supaya boleh terus log masuk tanpa klik link.
+- Untuk production: hidupkan balik & set Site URL + Redirect URLs ke domain Vercel kau (Supabase > Authentication > URL Configuration).
+
+## Halaman
+
+- `/login` - log masuk / daftar
+- `/vault` - senarai prompt kau + cari/tapis tag
+- `/vault/new` - simpan prompt baru
+- `/vault/[id]` - edit / padam / Test Live
+
+## Deploy (Vercel)
+
+1. Push ke GitHub
+2. Import projek di Vercel
+3. Isi 3 env vars (sama macam `.env.local`)
+4. Deploy
+5. Tambah domain Vercel dalam Supabase Auth URL Configuration
