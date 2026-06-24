@@ -28,7 +28,13 @@ export default function LoginPage() {
         router.refresh()
       }
     } else {
-      const { error } = await supabase.auth.signUp({ email, password })
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
       if (error) setMsg(error.message)
       else setMsg("Akaun dicipta. Jika pengesahan email aktif, semak inbox kau.")
     }
