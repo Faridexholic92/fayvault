@@ -32,6 +32,7 @@ export async function savePrompt(input: {
   }
 
   revalidatePath("/vault")
+  revalidatePath("/vault/dashboard")
   return { ok: true }
 }
 
@@ -46,5 +47,39 @@ export async function deletePrompt(id: string): Promise<ActionResult> {
   if (error) return { error: error.message }
 
   revalidatePath("/vault")
+  revalidatePath("/vault/dashboard")
+  return { ok: true }
+}
+
+export async function createCollection(name: string): Promise<ActionResult> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { error: "Sesi tamat. Sila log masuk semula." }
+  if (!name.trim()) return { error: "Nama koleksi kosong." }
+
+  const { error } = await supabase
+    .from("collections")
+    .insert({ owner_id: user.id, name: name.trim() })
+  if (error) return { error: error.message }
+
+  revalidatePath("/vault/koleksi")
+  revalidatePath("/vault/dashboard")
+  return { ok: true }
+}
+
+export async function deleteCollection(id: string): Promise<ActionResult> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { error: "Sesi tamat. Sila log masuk semula." }
+
+  const { error } = await supabase.from("collections").delete().eq("id", id)
+  if (error) return { error: error.message }
+
+  revalidatePath("/vault/koleksi")
+  revalidatePath("/vault/dashboard")
   return { ok: true }
 }
