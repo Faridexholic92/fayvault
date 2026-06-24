@@ -4,12 +4,14 @@ import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { deletePrompt } from "@/app/vault/actions"
+import { PromptThumb } from "@/components/prompt-thumb"
 
 type Item = {
   id: string
   title: string
   description: string | null
   tags: string[] | null
+  image_url: string | null
   updated_at: string
 }
 
@@ -82,27 +84,33 @@ export function PromptList({
         {filtered.map((p) => (
           <li
             key={p.id}
-            className="flex items-start gap-3 bg-white border rounded-lg p-4 hover:border-gray-400"
+            className="flex items-center gap-3 bg-white border rounded-lg p-4 hover:border-gray-400"
           >
-            <Link href={`/vault/${p.id}`} className="flex-1 min-w-0">
-              <div className="font-medium">{p.title}</div>
-              {p.description && (
-                <div className="text-sm text-gray-500 line-clamp-1">
-                  {p.description}
-                </div>
-              )}
-              {p.tags && p.tags.length > 0 && (
-                <div className="flex gap-1 mt-2 flex-wrap">
-                  {p.tags.map((t) => (
-                    <span
-                      key={t}
-                      className="text-xs bg-gray-100 rounded px-2 py-0.5"
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
-              )}
+            <Link
+              href={`/vault/${p.id}`}
+              className="flex items-center gap-3 flex-1 min-w-0"
+            >
+              <PromptThumb title={p.title} src={p.image_url} />
+              <div className="min-w-0">
+                <div className="font-medium truncate">{p.title}</div>
+                {p.description && (
+                  <div className="text-sm text-gray-500 truncate">
+                    {p.description}
+                  </div>
+                )}
+                {p.tags && p.tags.length > 0 && (
+                  <div className="flex gap-1 mt-1 flex-wrap">
+                    {p.tags.map((t) => (
+                      <span
+                        key={t}
+                        className="text-xs bg-gray-100 rounded px-2 py-0.5"
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
             </Link>
             <button
               onClick={() => onDelete(p.id)}

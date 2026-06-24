@@ -1,19 +1,25 @@
 "use client"
 
-import { useState } from "react"
+import { useState, type ChangeEvent } from "react"
 import { useRouter } from "next/navigation"
 import { parseVariables } from "@/lib/parse-variables"
 import { PromptEditor } from "@/components/prompt-editor"
 import { savePrompt, deletePrompt } from "@/app/vault/actions"
+import { createClient } from "@/lib/supabase/client"
 import type { Prompt } from "@/lib/types"
 
 export function PromptForm({ prompt }: { prompt?: Prompt }) {
   const router = useRouter()
+  const [supabase] = useState(() => createClient())
 
   const [title, setTitle] = useState(prompt?.title ?? "")
   const [description, setDescription] = useState(prompt?.description ?? "")
   const [body, setBody] = useState(prompt?.body ?? "")
   const [tagsInput, setTagsInput] = useState((prompt?.tags ?? []).join(", "))
+  const [imageUrl, setImageUrl] = useState<string | null>(
+    prompt?.image_url ?? null,
+  )
+  const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState("")
 
@@ -22,6 +28,34 @@ export function PromptForm({ prompt }: { prompt?: Prompt }) {
     .split(",")
     .map((t) => t.trim())
     .filter(Boolean)
+
+  async function onPickImage(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    setMsg("")
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) {
+      setMsg("Sesi tamat. Sila log masuk semula.")
+      setUploading(false)
+      return
+    }
+    const ext = (file.name.split(".").pop() || "png").toLowerCase()
+    const path = `${user.id}/${crypto.randomUUID()}.${ext}`
+    const { error } = await supabase.storage
+      .from("covers")
+      .upload(path, file, { upsert: true, cacheControl: "3600" })
+    if (error) {
+      setMsg("Upload gambar gagal: " + error.message)
+      setUploading(false)
+      return
+    }
+    const { data } = supabase.storage.from("covers").getPublicUrl(path)
+    setImageUrl(data.publicUrl)
+    setUploading(false)
+  }
 
   async function onSave() {
     setSaving(true)
@@ -32,6 +66,7 @@ export function PromptForm({ prompt }: { prompt?: Prompt }) {
       description,
       body,
       tags,
+      imageUrl,
     })
     if ("error" in result) {
       setMsg(result.error)
@@ -95,6 +130,48 @@ export function PromptForm({ prompt }: { prompt?: Prompt }) {
             className="w-full border rounded px-3 py-2"
           />
         </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Gambar cover (optional)
+          </label>
+          <div className="flex items-center gap-4">
+            {imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={imageUrl}
+                alt="cover"
+                className="h-20 w-20 rounded-lg object-cover border"
+              />
+            ) : (
+              <div className="h-20 w-20 rounded-lg border border-dashed flex items-center justify-center text-gray-400 text-xs text-center">
+                Tiada gambar
+              </div>
+            )}
+            <div className="space-y-2">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={onPickImage}
+                disabled={uploading}
+                className="block text-sm"
+              />
+              {uploading && (
+                <p className="text-xs text-gray-500">Memuat naik...</p>
+              )}
+              {imageUrl && !uploading && (
+                <button
+                  type="button"
+                  onClick={() => setImageUrl(null)}
+                  className="text-xs text-red-600 hover:underline"
+                >
+                  Buang gambar
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
         <div>
           <label className="block text-sm font-medium mb-1">Isi prompt</label>
           <PromptEditor value={body} onChange={setBody} />
@@ -114,7 +191,7 @@ export function PromptForm({ prompt }: { prompt?: Prompt }) {
         <div className="flex items-center gap-3">
           <button
             onClick={onSave}
-            disabled={saving || !title || !body}
+            disabled={saving || uploading || !title || !body}
             className="bg-black text-white rounded px-4 py-2 disabled:opacity-50"
           >
             {saving ? "Menyimpan..." : "Simpan"}

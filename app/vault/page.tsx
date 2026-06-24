@@ -17,7 +17,7 @@ export default async function VaultPage({
 
   const { data, error } = await supabase
     .from("prompts")
-    .select("id, title, description, tags, updated_at")
+    .select("id, title, description, tags, image_url, updated_at")
     .eq("owner_id", user.id)
     .order("updated_at", { ascending: false })
 

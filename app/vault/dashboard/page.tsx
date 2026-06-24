@@ -38,7 +38,7 @@ export default async function DashboardPage() {
   const [{ data: promptData }, { data: colData }] = await Promise.all([
     supabase
       .from("prompts")
-      .select("id, title, description, tags, collection_id, created_at, updated_at")
+      .select("id, title, description, tags, collection_id, image_url, created_at, updated_at")
       .eq("owner_id", user.id)
       .order("updated_at", { ascending: false }),
     supabase.from("collections").select("id, name").eq("owner_id", user.id),
@@ -194,7 +194,7 @@ export default async function DashboardPage() {
                     href={`/vault/${p.id}`}
                     className="flex items-center gap-3 py-2.5 hover:bg-gray-50 rounded-lg px-1"
                   >
-                    <PromptThumb title={p.title as string} />
+                    <PromptThumb title={p.title as string} src={p.image_url as string | null} />
                     <div className="flex-1 min-w-0">
                       <div className="font-medium truncate">{p.title}</div>
                       {p.description && (

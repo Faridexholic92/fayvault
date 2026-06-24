@@ -12,6 +12,7 @@ export async function savePrompt(input: {
   description: string
   body: string
   tags: string[]
+  imageUrl?: string | null
 }): Promise<ActionResult> {
   const supabase = await createClient()
 
@@ -22,6 +23,7 @@ export async function savePrompt(input: {
     p_body: input.body,
     p_tags: input.tags,
     p_variables: parseVariables(input.body),
+    p_image_url: input.imageUrl ?? null,
   })
 
   if (error) {

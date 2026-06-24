@@ -13,7 +13,23 @@ function hash(s: string) {
   return Math.abs(h)
 }
 
-export function PromptThumb({ title }: { title: string }) {
+export function PromptThumb({
+  title,
+  src,
+}: {
+  title: string
+  src?: string | null
+}) {
+  if (src) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={src}
+        alt={title}
+        className="h-10 w-10 shrink-0 rounded-lg object-cover border"
+      />
+    )
+  }
   const g = GRADIENTS[hash(title) % GRADIENTS.length]
   const letter = (title.trim()[0] ?? "P").toUpperCase()
   return (
